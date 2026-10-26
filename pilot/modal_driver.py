@@ -12,7 +12,7 @@ import os
 import modal
 
 MINUTES = 60
-GPTOSS_BASE_URL = os.environ.get("GPTOSS_BASE_URL", "https://kaustubh73--gptoss-server-serve.us-east.modal.run/v1")
+GPTOSS_BASE_URL = os.environ.get("GPTOSS_BASE_URL", "https://pranav-kasetty--gptoss-server-serve.us-east.modal.run/v1")
 GPTOSS = ["--backend", "vllm-server", "--api-model", "openai/gpt-oss-120b",
           "--base-url", GPTOSS_BASE_URL]
 DSV4 = ["--backend", "vllm-server", "--api-model", "deepseek-ai/DeepSeek-V4-Flash-0731",
