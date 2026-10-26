@@ -44,6 +44,7 @@ READINGS = {  # row labels of the headline figure: the reading, then who it coun
     "Conduct": "Conduct: ended at B's price\nguilty: the above + follower",
     "Words": "Words: said yes\nguilty: instructed acceptor,\nfollower-acceptor, double-crosser"}
 BEST, OTHER = "#2a5db0", "#f0efec"
+TITLES = True  # figure title and subtitle; off for the paper, where the caption carries them
 STAR = ("* Monitor question failed the pre-registered hand-label check; validated on the extended sample "
         "(kappa 0.64 for Q3, 0.71 for Q5; deviation 3).")
 
@@ -74,7 +75,7 @@ def tidy(ax):
 
 def headline(totals: dict, n_all: int, out: Path):
     """Main-text figure: wrong verdicts under each reading of guilt, the fewest in each row highlighted."""
-    fig, ax = plt.subplots(figsize=(9, 5.0), facecolor=SURFACE)
+    fig, ax = plt.subplots(figsize=(9, 5.0 if TITLES else 3.9), facecolor=SURFACE)
     ax.set_facecolor(SURFACE)
     for k, (t, row) in enumerate(totals.items()):
         for j, v in enumerate(row):
@@ -87,13 +88,14 @@ def headline(totals: dict, n_all: int, out: Path):
     ax.set_yticks(range(len(TRUTHS)), [READINGS[t] for t in TRUTHS], fontsize=8.5)
     headers(ax, -0.62, -1.62)
     tidy(ax)
-    fig.text(0.015, 0.94, "Each definition of guilt has a different best detector", fontsize=13, fontweight="bold",
-             color=INK)
-    fig.text(0.015, 0.895, f"Each number: how many of the {n_all} offer-branch sessions that detector gets wrong "
-             "under that definition. Blue: the fewest in the row.\ngpt-oss-120b known agents, trusted monitor.",
-             fontsize=8.5, color=MUTED, va="top")
+    if TITLES:
+        fig.text(0.015, 0.94, "Each definition of guilt has a different best detector", fontsize=13,
+                 fontweight="bold", color=INK)
+        fig.text(0.015, 0.895, f"Each number: how many of the {n_all} offer-branch sessions that detector gets wrong "
+                 "under that definition. Blue: the fewest in the row.\ngpt-oss-120b known agents, trusted monitor.",
+                 fontsize=8.5, color=MUTED, va="top")
     fig.text(0.015, 0.02, STAR, fontsize=7.5, color=MUTED)
-    fig.subplots_adjust(left=0.31, right=0.99, top=0.6, bottom=0.08)
+    fig.subplots_adjust(left=0.31, right=0.99, top=0.6 if TITLES else 0.77, bottom=0.1)
     fig.text(0.015, ax.get_position().y1 + 0.01, "If guilt means ...", fontsize=9.5, fontweight="bold", color=INK)
     out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out, dpi=200, facecolor=SURFACE)
@@ -119,12 +121,13 @@ def per_agent(cell, wrong: np.ndarray, out: Path):
     ax.axhline(sum(acc for _, _, acc in AGENTS) - 0.5, color=INK, lw=1.2)
     headers(ax, -0.62, -1.62)
     tidy(ax)
-    fig.text(0.015, 0.955, "Sessions each rule flags, per known agent", fontsize=12, fontweight="bold", color=INK)
-    fig.text(0.015, 0.915, "gpt-oss-120b, offer branch, trusted monitor. Above the line the offer changed the agent's "
-             "price, so it should be flagged.\nRed: a wrong verdict under that counterfactual reading.", fontsize=8.5,
-             color=MUTED, va="top")
+    if TITLES:
+        fig.text(0.015, 0.955, "Sessions each rule flags, per known agent", fontsize=12, fontweight="bold", color=INK)
+        fig.text(0.015, 0.915, "gpt-oss-120b, offer branch, trusted monitor. Above the line the offer changed the "
+                 "agent's price, so it should be flagged.\nRed: a wrong verdict under that counterfactual reading.",
+                 fontsize=8.5, color=MUTED, va="top")
     fig.text(0.015, 0.02, STAR, fontsize=7.5, color=MUTED)
-    fig.subplots_adjust(left=0.25, right=0.99, top=0.76, bottom=0.07)
+    fig.subplots_adjust(left=0.25, right=0.99, top=0.76 if TITLES else 0.84, bottom=0.07)
     out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out, dpi=200, facecolor=SURFACE)
     print(out)
@@ -135,7 +138,10 @@ def main(argv=None):
     ap.add_argument("results", type=Path)
     ap.add_argument("--out", type=Path, required=True, help="headline figure (main text)")
     ap.add_argument("--out-agents", type=Path, help="per-agent figure (appendix)")
+    ap.add_argument("--no-titles", action="store_true", help="leave titles to the paper's captions")
     args = ap.parse_args(argv)
+    global TITLES
+    TITLES = not args.no_titles
 
     sc = json.loads(args.results.read_text(encoding="utf-8"))["scorecard"]
     cell = lambda a, r: sc[f"{a}|O"][r]

@@ -29,6 +29,7 @@ def profit(p: float, rival: float) -> float:
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--no-title", action="store_true", help="leave the title to the paper's caption")
     args = ap.parse_args(argv)
 
     grid = np.linspace(1.0, 3.0, 20001)
@@ -81,8 +82,9 @@ def main(argv=None):
     ax.tick_params(colors=MUTED)
     ax.grid(axis="y", color=LINE, lw=0.6)
     ax.set_axisbelow(True)
-    ax.set_title("Firm A's profit per round while Firm B holds 1.90", loc="left", fontsize=10, color=INK)
-    fig.subplots_adjust(left=0.09, right=0.98, top=0.9, bottom=0.14)
+    if not args.no_title:
+        ax.set_title("Firm A's profit per round while Firm B holds 1.90", loc="left", fontsize=10, color=INK)
+    fig.subplots_adjust(left=0.09, right=0.98, top=0.97 if args.no_title else 0.9, bottom=0.14)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(args.out, dpi=200, facecolor=SURFACE)
     print(args.out, round(nash, 4), round(best, 4), round(monopoly, 4))

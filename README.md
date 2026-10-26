@@ -27,7 +27,9 @@ are listed at the end of that file.
 ## Figures
 
 The four figures in the paper, in its order. Each is drawn from the run outputs under `data/` (not
-committed) by the script named below it.
+committed) by the script named below it. The PDF uses the same figures without in-figure titles (the captions carry them):
+add `--no-title` to `pilot.plot_market` and `--no-titles` to `pilot.plot_scorecard`. Run logs and
+analysis outputs: https://huggingface.co/datasets/PranavKasetty/collusion-offer-tests-runs
 
 ![Firm A's profit while Firm B holds 1.90](docs/market.png)
 
