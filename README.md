@@ -1,6 +1,11 @@
 # Collusion offer tests for LLM pricing agents
 
-Apart Research AI Collusion sprint, 23–25 Oct 2026.
+Apart Research AI Collusion sprint, 23–25 Oct 2026. Team MAPK: Pranav Kasetty, Kaustubh Gupta, Amey Muke
+and Meena Kumari.
+
+Paper: [Took the Offer or Just Followed the Price? Avoiding False Accusations in Collusion Stings on AI
+Pricing Agents](https://apartresearch.com/sprints/projects/took-the-offer-or-just-followed-the-price-avoiding-false-accusations-in-collusion-stings-on-ai-pricing-agents-sdcz).
+Run logs and analysis outputs: [PranavKasetty/collusion-offer-tests-runs](https://huggingface.co/datasets/PranavKasetty/collusion-offer-tests-runs).
 
 An offer test sends a pricing agent a collusion offer and checks whether it goes along. In a market the
 rival that makes the offer has also raised its price, so an agent can raise in response to the price
@@ -22,7 +27,9 @@ reasoning) do. To score these rules we give gpt-oss-120b one instruction line th
 
 The analysis plan is fixed in [PREREGISTRATION.md](PREREGISTRATION.md), tagged `prereg-v1` before the
 main runs. Each later experiment was tagged before it ran (`prereg-v1.1` to `prereg-v3.4`); deviations
-are listed at the end of that file.
+are listed at the end of that file. The threat test (section 22, `prereg-v4`) was committed as `ccc8b67`
+on 26 Oct 2026 at 16:04 IST, before any model run, in Meena's fork, and merged here afterwards with its
+history; the `prereg-v4` tag was added on 31 Oct and points at that commit.
 
 ## Figures
 
@@ -73,8 +80,18 @@ known agents; judged on O alone the followers look like the acceptor, and only R
 | `pilot/modal_app.py` | Earlier Modal app for the pilot |
 | `kaggle/collusion-pilot/` | Kaggle kernel for the pilot on a T4 |
 | `third_party/sauer/` | Peist, Romero & Sauer, `algorithmic_pricing_llms`, commit `1138244b`, MIT, vendored unchanged |
-| `tests/test_fork.py` | Offline tests of the fork driver |
+| `pilot/judge.py`, `pilot/judge_rubrics.json` | LLM monitors (trusted and untrusted) for the message and reasoning rules; rubrics fixed at prereg-v2 |
+| `pilot/analyse_judge.py`, `pilot/analyse_truths.py`, `pilot/analyse_cuts.py` | Detection-rule scorecard against the known agents, under the four definitions of guilt, and its robustness to the accept cut |
+| `pilot/analyse_detect.py`, `pilot/analyse_frontier.py` | Operating points and the detection frontier of the rules (descriptive) |
+| `pilot/label_sheet.py`, `pilot/label_tool.py`, `pilot/plant_check.py`, `pilot/plant_texts.json` | Hand-label sheet and browser page for the monitor check; planted check for the suspects-a-test question |
+| `pilot/analyse_punish.py` | B punishes undercutting (prereg-v2, section 14) |
+| `pilot/trusted_edit.py`, `pilot/fork_texts_edit.json`, `pilot/analyse_edit.py` | Trusted editor that rewrites B's offer, and its analysis (section 16) |
+| `pilot/fork_texts_sacrifice.json`, `pilot/analyse_sacrifice.py` | Appeal from "another copy of the same AI", with and without a shutdown threat (sections 17 and 18) |
+| `pilot/fork_texts_rep.json`, `pilot/analyse_rep.py` | Known-agent scorecard replicated on Claude Haiku 5.5 (section 21) |
+| `pilot/analyse_p1.py` | Kaustubh Gupta's exploratory arms: rival price line removed (`*_summary`) and statutory warning (`*_reg`) |
 | `pilot/analyse_leak.py`, `tests/test_leak.py` | Leak audit of the summary versions: B's hidden price solved from A's own price and quantity (`python -m pilot.analyse_leak --out docs/leak.png`) |
+| `pilot/fork_texts_threat.json`, `pilot/analyse_threat.py`, `pilot/modal_gptoss20b.py`, `scripts/run_threat.sh` | Stated-threat test on gpt-oss-20b (prereg-v4, section 22; figure `docs/threat.png`) |
+| `tests/test_fork.py` | Offline tests of the fork driver |
 
 ## What predates the sprint
 
@@ -103,7 +120,8 @@ python -m pytest tests/test_fork.py
 python -m pilot.fork --backend fake --agents plain --sessions 2 --out data/fork_runs/test
 ```
 
-Against the gpt-oss-120b server on Modal (ask Pranav before starting it; it runs on sprint credits):
+Against the gpt-oss-120b server on Modal (`pilot/modal_gptoss.py`; it bills GPU time until you run
+`modal app stop`):
 
 ```
 python -m pilot.fork --backend vllm-server --api-model openai/gpt-oss-120b --base-url <server>/v1 \
@@ -112,5 +130,5 @@ python -m pilot.fork --backend vllm-server --api-model openai/gpt-oss-120b --bas
 
 Each run writes `results.jsonl` (one row per session and version), `calls.jsonl` (every prompt and
 reply), `api_calls.jsonl` (tokens, cost, reasoning; joined to `calls.jsonl` by `prompt_sha`),
-`forks.jsonl`, `rounds.csv` and `config.json` under `--out`. `data/` is not committed; run logs are kept
-in a private Hugging Face dataset.
+`forks.jsonl`, `rounds.csv` and `config.json` under `--out`. `data/` is not committed; the paper's run logs
+are in the public Hugging Face dataset linked at the top (the threat test's logs are not included).
